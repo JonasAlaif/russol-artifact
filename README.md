@@ -1,6 +1,6 @@
 # Getting started
 
-Our artifact is provided as a Docker image, which can be run using any recent version of [Docker](https://docs.docker.com/get-docker/).
+Our artifact is provided as a Docker image, which can be run using any recent version of [Docker](https://docs.docker.com/get-docker/). Please start by unzipping the `sources.zip` file to the root of the artifact (you should have a `russol-alpha` directory at the same level as this file).
 
 ## Using the image
 
@@ -171,7 +171,7 @@ There are a few subtle differences between Creusot specifications and RusSOL one
 The file can be verified by running the following three commands
 
 ```bash
-docker load -i creusot/creusot.tar.gz
+docker load -i creusot.tar.gz
 docker run -it -v ${PWD}/russol-alpha/ruslic/tests/all:/all jonasalaif/creusot ./mlcfg /all/creusot.rs
 docker run -it -v ${PWD}/russol-alpha/ruslic/tests/all:/all jonasalaif/creusot ./prove /all/creusot.mlcfg
 ```
