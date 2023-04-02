@@ -27,8 +27,7 @@ jobs:
       - name: Build and push Creusot
         uses: docker/build-push-action@v4
         with:
-          context: .
-          file: ./creusot/Dockerfile
+          context: ./creusot
           # platforms: linux/amd64,linux/arm64
           push: true
           tags: jonasalaif/creusot:latest
