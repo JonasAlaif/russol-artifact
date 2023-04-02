@@ -1,0 +1,10 @@
+# Ignore everything
+*
+
+# Allow required dirs
+!/demo
+!/russol-alpha
+
+# Ignore target dir, in case of building locally
+**/target
+**/.git

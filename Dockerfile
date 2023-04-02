@@ -25,4 +25,11 @@ RUN cargo test --release --no-run
 ENV SUSLIK_DIR=/home/sbtuser/russol-alpha/suslik
 RUN cargo run --release --bin ruslic ruslic/tests/synth/paper/rust/custom/general/clone.rs
 
+# Prefetch crates for demo
+COPY --chown=sbtuser demo /home/sbtuser/demo
+RUN cargo fetch --manifest-path=/home/sbtuser/demo/Cargo.toml
+
+# Print outputs only relevant to evaluation
+ENV RUSLIC_EVAL=true
+
 ENTRYPOINT ["cargo"]

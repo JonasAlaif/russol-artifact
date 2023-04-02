@@ -1,8 +1,12 @@
 # Getting started
 
-Our artifact is provided as a Docker image, which can be run using any recent version of [Docker](https://docs.docker.com/get-docker/). Please start by unzipping the `sources.zip` file to the root of the artifact (you should have a `russol-alpha` directory at the same level as this file).
+Our artifact is provided as a Docker image, which can be run using any recent version of [Docker](https://docs.docker.com/get-docker/). Please start by unzipping the `sources.zip` file to the root of the artifact.
+
+**Unzip to the root**, you should *not* have a `./sources/` directory, but instead a `./russol-alpha/` directory at the same level as this `README.md`!
 
 ## Using the image
+
+> If any of the commands in this section do not work for you, take a look at [alternatives](#alternatives).
 
 With `docker` installed and in your path, start by loading the `russol` image from the included file. From the root of the artifact, run the following command
 
@@ -12,14 +16,18 @@ With `docker` installed and in your path, start by loading the `russol` image fr
 docker load -i russol.tar.gz
 ```
 
-> If any of the commands in this section do not work for you, take a look at [alternatives](#alternatives).
+We provide images for `amd64` and `arm64`, if you are on a different architecture you will see the following warning:
+```
+WARNING: The requested image's platform does not match the detected host platform ...
+```
+In such a case we recommend building the docker image manually for your architecture as described under [alternatives](#alternatives).
 
 ### Single file
 
 The image is used to run RusSOL; check that it is working correctly by running the following command
 
 ```bash
-docker run -it -v ${PWD}/demo.rs:/demo.rs jonasalaif/russol run --release --bin ruslic /demo.rs
+docker run --rm -it -v ${PWD}/demo.rs:/demo.rs jonasalaif/russol run --release --bin ruslic /demo.rs
 ```
 
 > On Windows this command must be run in PowerShell, for the `cmd` terminal replace `${PWD}` with `%cd%`.
@@ -52,27 +60,28 @@ Running the tool on a crate within a directory is also possible, using the follo
 > Unlike for the single file, this will **modify** the files in the directory with the synthesis results!
 
 ```bash
-docker run -it -v ${PWD}/demo:/demo jonasalaif/russol run --release --bin cargo-russol -- --manifest-path=/demo/Cargo.toml
+docker run --rm -it -v ${PWD}/demo:/demo jonasalaif/russol run --release --bin cargo-russol -- --manifest-path=/demo/Cargo.toml
+```
+
+Linux users may run into a permission issue where the Docker image cannot modify files in the mouned directory, this can be fixed by running (and then retrying the above command)
+
+```bash
+chmod o+rw -R demo
 ```
 
 ## Structure of the artifact
 
-The tool is located at `/home/sbtuser/russol-alpha` within the image (the working directory when running the image). A copy of this directory is included in `russol-alpha` at the root of the artifact, to allow files to be inspected locally. We now explain the structure of this directory.
-
-- The `ruslic` directory contains the code for the frontend translation of the Rust signature and types into and SOL task.
-  - The `ruslic/tests` directory contains both the test harnesses as well as the files tested on.
-- The `russol-contracts` and `russol-macros` directories define the procedural macros for annotating signatures (e.g. `#[requires(...)]`, `#[pure]` etc.)
-- The `suslik` directory contains a heavily modified version of SuSLik, used as the backend for solving SOL tasks.
+The structure of the artifact is detailed in the [`STRUCTURE.md`](STRUCTURE.md) file.
 
 ## Advanced use of the image
 
 We now explain the docker command to run RosSOL in more detail. It can be broken down into
 
 ```bash
-docker run -it -v ${PWD}/demo.rs:/demo.rs jonasalaif/russol run --release --bin ruslic /demo.rs
-^^^^^^^^^^^^^^                            ^^^^^^^^^^^^^^^^^                                     (1)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^                                                       (2)
-                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ (3)
+docker run --rm -it -v ${PWD}/demo.rs:/demo.rs jonasalaif/russol run --release --bin ruslic /demo.rs
+^^^^^^^^^^^^^^^^^^^                            ^^^^^^^^^^^^^^^^^                                     (1)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^                                                       (2)
+                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ (3)
 ```
 
 1. Basic command to run the image (configured to run `cargo` from within the `/home/sbtuser/russol-alpha` in the image).
@@ -83,9 +92,9 @@ When running the tool, 1. should remain the same, 2. can be used to mount whiche
 
 ## Alternatives (building locally)
 
-Both images can also be found on Docker Hub (`docker pull jonasalaif/russol`), additionally the `Dockerfile` to manually build the `jonasalaif/russol` image (`docker build -t jonasalaif/russol .`) is included in the artifact.
+Both images can also be found on Docker Hub (e.g. `docker pull jonasalaif/russol`), additionally the `Dockerfile` to manually build either of the images (e.g. `docker build -t jonasalaif/russol .`) are included in the artifact.
 
-One can also build the tool locally, by following the same steps as in the Dockerfile; the tool depends on `jre`/`sbt`, `z3` and `rustc`/`cargo`. Once these are installed run `cargo build --release` from the `russol-alpha` directory to build the frontend, and then `cargo run --release --bin ruslic path/to/test/file.rs` will build the backend during first execution. Compared to the process described here, the artifact can be evaluated locally in exactly the same way, but with `docker run -it ... jonasalaif/russol [args]` replaced by `cargo [args]`.
+One can also build the tool locally, by following the same steps as in the Dockerfile; the tool depends on `jre`/`sbt`, `z3` and `rustc`/`cargo`. Once these are installed run `cargo build --release` from the `russol-alpha` directory to build the frontend, and then `cargo run --release --bin ruslic path/to/test/file.rs` will build the backend during first execution. Compared to the process described in this file, the artifact can be evaluated locally in exactly the same way, but with `docker run --rm -it ... jonasalaif/russol [args]` replaced by `cargo [args]`.
 
 # Step-by-Step Instructions
 
@@ -96,15 +105,15 @@ The artifact includes the tools required to verify all of our claims. We describ
 The StackOverflow example from Fig. 1 can be found at `russol-alpha/ruslic/tests/synth/paper/rust/stackoverflow/reborrow.rs`. It can be synthesized by running the tool on a single file as described above
 
 ```bash
-docker run -it -v ${PWD}/russol-alpha/ruslic/tests/synth/paper/rust/stackoverflow/reborrow.rs:/reborrow.rs jonasalaif/russol run --release --bin ruslic /reborrow.rs
+docker run --rm -it -v ${PWD}/russol-alpha/ruslic/tests/synth/paper/rust/stackoverflow/reborrow.rs:/reborrow.rs jonasalaif/russol run --release --bin ruslic /reborrow.rs
 ```
 
 ## Section 2
 
-The running example from this section can be found at `russol-alpha/ruslic/tests/synth/paper/rust/custom/paper/list_paper.rs`. All of the functions can be synthesized in one go with
+The running example from this section can be found at `russol-alpha/ruslic/tests/synth/paper/rust/custom/list_ex/list_paper.rs`. All of the functions can be synthesized in one go with
 
 ```bash
-docker run -it -v ${PWD}/russol-alpha/ruslic/tests/synth/paper/rust/custom/paper/list_paper.rs:/list_paper.rs jonasalaif/russol run --release --bin ruslic /list_paper.rs
+docker run --rm -it -v ${PWD}/russol-alpha/ruslic/tests/synth/paper/rust/custom/list_ex/list_paper.rs:/list_paper.rs jonasalaif/russol run --release --bin ruslic /list_paper.rs
 ```
 
 The order of the functions is the same as presented in the paper, though the names of some of the functions are changed to avoid clashes. There is also an additional `pop` function, which is not mentioned in the paper.
@@ -117,12 +126,14 @@ There are two main points to be checked for the evaluation; the results from Tab
 
 ### Table 1
 
+**Note on parallelism**: The execution times of the commands in this section are drastically reduced by synthesizing all functions within a file/crate in parallel. The tool enables this by default, but it may lead to slightly longer recorded synthesis times per funtion, especially for systems with fewer cores. Additionally when synthesizing large crates (in the 100 crates test) significant memory may be required (up to 32GB); the Docker memory limit must be increased. If one needs precise permormance data or runs into out-of-memory issues, this parallelism can be disabled by adding the `-e RUSLIC_MULTITHREADED=false` flag to the docker commands (i.e. `docker run -e RUSLIC_MULTITHREADED=false ...`).
+
 #### Rust, SuSLik and Verifier categories
 
 The categories "Rust", "SuSLik" and "Verifier" are contained in respective directories inside `russol-alpha/ruslic/tests/synth/paper`. They can all be synthesized by running the test harness `.../tests/ci.rs` with
 
 ```bash
-docker run -it -v ${PWD}/russol-alpha/ruslic/tests/synth/paper:/home/sbtuser/russol-alpha/ruslic/tests/synth/paper jonasalaif/russol test --release --test ci -- all_tests --nocapture
+docker run --rm -it -v ${PWD}/russol-alpha/ruslic/tests/synth/paper:/home/sbtuser/russol-alpha/ruslic/tests/synth/paper jonasalaif/russol test --release --test ci -- all_tests --nocapture
 ```
 
 > The `-v ${PWD}/russol-alpha/ruslic/tests/synth/paper:/home/sbtuser/russol-alpha/ruslic/tests/synth/paper` part is redundant, but can be included to ensure that we are running on the same tests as the ones in the artifact.
@@ -130,12 +141,20 @@ docker run -it -v ${PWD}/russol-alpha/ruslic/tests/synth/paper:/home/sbtuser/rus
 After synthesizing all of the test cases, a table similar (time results will vary) to the one found at `.../tests/ci-results.txt` will be printed. This table contains a summary of the results for each category, for example
 
 ```text
- # rust (rust & 50 & LOC 6.2 & AN 14.4 & SN 19.2 & USN 21.8 & RA 33.0 & ? & T 2.4)
+ rust  Solved 50  Time 1.1s  SOL rules 32.98  Rust LOC 6.16  Code/Spec 1.27  Sln nodes 19.20  Ann nodes 14.42  Non-exec pure fn nodes 0.72
 ```
 
-means that for the "Rust" category, 50 test cases were synthesized, with an average of 6.2 LOC per function, 14.4 annotation AST nodes, 19.2 synthesized AST nodes, 21.8 unsimplified synthesized AST nodes (not reported in the paper), 33.0 rule applications and 2.4 seconds of synthesis time.
+The annotation overhead (Code/Spec) is reported as the ratio of the number of synthesized solution AST nodes to the *total* number of annotation AST nodes. The pure function AST nodes are included in the annotation count only if they return a type not usable outside of specification (e.g. `Set<T>`).
 
-Stats per function are also reported, for example
+The two failing cases can be found under `.../tests/synth/paper/rust/stackoverflow/swap_enum.rs` and at the end of `.../tests/synth/paper/suslik/rose-tree_multi-list/rose-tree_multi-list.rs`. They are not tested by the command above, but can be uncommented and synthesized individually (as described above).
+
+#### Full output
+
+The test above printed only a reduced output for easier comparison to the table. To print the full output add `-e RUSLIC_EVAL=false` to the command (i.e. `docker run -e RUSLIC_EVAL=false ...`). This flag only affects the formatting of the benchmarking results.
+
+The full output includes all categories, even some sub-categories which are not mentioned/included in the paper. The results for each category now also list the used pure functions along with their AST nodes and whether they are counted as executable.
+
+Additionally, stats per function are also reported, for example
 
 ```text
 stack.rs::List::<T>::new - 0_204ms [1/3/3/5] | spec_ast: 4, pfn_ast: {"List::<T>::len": 14, "Node::<T>::len": 16}
@@ -143,24 +162,19 @@ stack.rs::List::<T>::new - 0_204ms [1/3/3/5] | spec_ast: 4, pfn_ast: {"List::<T>
 
 means that the function `List::<T>::new` was synthesized in 0.204 seconds, with 1 LOC, 3 synthesized AST nodes, 3 unsimplified synthesized AST nodes (not reported in the paper), 5 rule applications and a specification AST of size 4. Pure functions used for the specification and their size in AST nodes are also reported.
 
-The annotation overhead is reported as the ratio of the number of synthesized AST nodes to the number of annotation AST nodes. The pure function AST nodes are included in the annotation count only if they return a type not usable outside of specification (e.g. `Set<T>`).
-
-Only the results under `# paper` are relevant to the paper. The results under `# other` are extra synthesis tasks which were not included in the paper and should be ignored.
-
-The two failing cases can be found under `.../tests/synth/paper/rust/stackoverflow/swap_enum.rs` and at the end of `.../tests/synth/paper/suslik/rose-tree_multi-list/rose-tree_multi-list.rs`. They are not tested by the command above, but can be uncommented and synthesized individually (as described above).
-
 #### 100-Crates category
 
-The test harness `.../tests/top_crates.rs` downloads the top 100 crates from crates.io and runs the tool on them. It can be run with
+The test harness `.../tests/top_crates.rs` runs the tool on the top 100 crates cached in the directory `russol-alpha/ruslic/tmp/`, we use the latest version of the crates as of the creation of the artifact. It can be run with
 
-> This command takes multiple hours to complete!
+> This command requires up to 32GB memory allocated to Docker and can take multiple hours to complete! The memory requirement can be reduced by disabling parallelism 
 
 ```bash
-docker run -it jonasalaif/russol test --release --test top_crates -- top_crates_all --nocapture
+docker run --rm -it jonasalaif/russol test --release --test top_crates -- top_crates_cached --nocapture
 ```
 
-At the end it will print a summary of the results, which should look similar to that included in `.../tests/crates-results.txt`, though there will be small differences due to changes in the crates (the test always downloads the latest version of each crate).
+At the end it will print a summary of the results, which should look similar to that included in `.../tests/crates-results.txt`.
 
+The tool can also be run on the current latest version of the top 100 crates from crates.io by replacing `top_crates_cached` with `top_crates_all` in the above command.
 
 ### Creusot
 
@@ -172,8 +186,8 @@ The file can be verified by running the following three commands
 
 ```bash
 docker load -i creusot.tar.gz
-docker run -it -v ${PWD}/russol-alpha/ruslic/tests/all:/all jonasalaif/creusot ./mlcfg /all/creusot.rs
-docker run -it -v ${PWD}/russol-alpha/ruslic/tests/all:/all jonasalaif/creusot ./prove /all/creusot.mlcfg
+docker run --rm -it -v ${PWD}/russol-alpha/ruslic/tests/all:/all jonasalaif/creusot ./mlcfg /all/creusot.rs
+docker run --rm -it -v ${PWD}/russol-alpha/ruslic/tests/all:/all jonasalaif/creusot ./prove /all/creusot.mlcfg
 ```
 
 > All proof goals should be verified successfully, except the last one ("clone'_refn") which was not synthesized but rather automatically generated by `#[derive(Clone)]`.
@@ -197,7 +211,7 @@ The main changes required to adapt a file for Creusot are:
 The image was built using `creusot/Dockerfile`, using the [latest](https://github.com/xldenis/creusot/commit/6026057d026208589c2ebee785210845f3561ad0) version of Creusot. To explore the contents of this image, one can open a `bash` terminal with
 
 ```bash
-docker run -it jonasalaif/creusot
+docker run --rm -it jonasalaif/creusot
 ```
 
 Refer to the [Creusot repository](https://github.com/xldenis/creusot) for reference.
