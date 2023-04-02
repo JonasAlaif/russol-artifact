@@ -1,9 +1,9 @@
-name: Build Docker images
+name: Build Creusot Docker image
 
 on:
   push:
-    branches:
-      - 'main'
+    branches: 'main'
+    paths: 'creusot/**'
 
 jobs:
   docker:
