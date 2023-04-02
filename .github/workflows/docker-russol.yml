@@ -3,7 +3,7 @@ name: Build Russol Docker image
 on:
   push:
     branches: 'main'
-    paths: '!creusot/**'
+    paths: ['russol-alpha', 'demo/**', '.github/workflows/docker-creusot.yml']
 
 jobs:
   docker:
@@ -28,14 +28,6 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          # platforms: linux/amd64,linux/arm64
           push: true
           tags: jonasalaif/russol:latest
-      - name: Build and push Creusot
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: ./creusot/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: jonasalaif/creusot:latest

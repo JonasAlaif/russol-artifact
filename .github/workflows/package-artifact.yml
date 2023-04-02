@@ -1,0 +1,26 @@
+name: Create artifact
+
+on:
+  push:
+    branches: 'main'
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Create sources zip
+        run: |
+          chmod o+rw -R demo
+          zip -r sources.zip creusot demo russol-alpha .dockerignore demo.rs Dockerfile STRUCTURE.md -x **/.git
+          zip -r artifact.zip sources.zip LICENSE README.md
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifact.zip
+          path: artifact.zip
