@@ -24,7 +24,29 @@ jobs:
           username: jonasalaif
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Russol
+      - name: Build Russol image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          load: true
+          tags: jonasalaif/russol:test
+
+      - name: Run evaluation intro
+        run: |
+          docker run --rm -it -v ${PWD}/demo.rs:/demo.rs jonasalaif/russol:test run --release --bin ruslic /demo.rs
+          docker run --rm -it -v ${PWD}/demo:/demo jonasalaif/russol:test run --release --bin cargo-russol -- --manifest-path=/demo/Cargo.toml
+          docker run --rm -it -v ${PWD}/russol-alpha/ruslic/tests/synth/paper/rust/stackoverflow/reborrow.rs:/reborrow.rs jonasalaif/russol:test run --release --bin ruslic /reborrow.rs
+          docker run --rm -it -v ${PWD}/russol-alpha/ruslic/tests/synth/paper/rust/custom/list_ex/list_paper.rs:/list_paper.rs jonasalaif/russol:test run --release --bin ruslic /list_paper.rs
+      - name: Run evaluation benchmarks
+        run:
+          docker run --rm -it -v ${PWD}/russol-alpha/ruslic/tests/synth/paper:/home/sbtuser/russol-alpha/ruslic/tests/synth/paper jonasalaif/russol:test test --release --test ci -- all_tests --nocapture
+      # Skip due to very long runtime:
+      # - name: Run evaluation top 100 crates
+      #   run:
+      #     docker run --rm -it jonasalaif/russol:test test --release --test top_crates -- top_crates_cached --nocapture
+
+      - name: Push Russol image
         uses: docker/build-push-action@v4
         with:
           context: .

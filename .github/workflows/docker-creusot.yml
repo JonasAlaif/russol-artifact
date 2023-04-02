@@ -24,7 +24,20 @@ jobs:
           username: jonasalaif
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Creusot
+      - name: Build Creusot image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./creusot
+          platforms: linux/amd64,linux/arm64
+          load: true
+          tags: jonasalaif/creusot:test
+
+      - name: Run evaluation
+        run: |
+          docker run --rm -it -v ${PWD}/russol-alpha/ruslic/tests/all:/all jonasalaif/creusot:test ./mlcfg /all/creusot.rs
+          docker run --rm -it -v ${PWD}/russol-alpha/ruslic/tests/all:/all jonasalaif/creusot:test ./prove /all/creusot.mlcfg
+
+      - name: Push Creusot image
         uses: docker/build-push-action@v4
         with:
           context: ./creusot
