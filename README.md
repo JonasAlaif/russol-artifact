@@ -13,10 +13,10 @@ With `docker` installed and in your path, start by loading the `russol` image fr
 > The `creusot` image is only required for the [Creusot subsection](#creusot), and can be ignored for now.
 
 ```bash
-docker load -i russol.tar.gz
+docker load -i russol-arch.tar.gz
 ```
 
-We provide images for `amd64` and `arm64`, if you are on a different architecture you will see the following warning:
+We provide images for the `arm64` (Apple sillicon Macs) and `amd64` (most other computers) architectures, if you are on a different architecture you will see the following warning:
 ```
 WARNING: The requested image's platform does not match the detected host platform ...
 ```
@@ -126,7 +126,7 @@ There are two main points to be checked for the evaluation; the results from Tab
 
 ### Table 1
 
-**Note on parallelism**: The execution times of the commands in this section are drastically reduced by synthesizing all functions within a file/crate in parallel. The tool enables this by default, but it may lead to slightly longer recorded synthesis times per funtion, especially for systems with fewer cores. Additionally when synthesizing large crates (in the 100 crates test) significant memory may be required (up to 32GB); the Docker memory limit must be increased. If one needs precise permormance data or runs into out-of-memory issues, this parallelism can be disabled by adding the `-e RUSLIC_MULTITHREADED=false` flag to the docker commands (i.e. `docker run -e RUSLIC_MULTITHREADED=false ...`).
+**Note on parallelism**: The execution times of the commands in this section are drastically reduced by synthesizing all functions within a file/crate in parallel. The tool enables this by default, but it may lead to slightly longer recorded synthesis times per funtion, especially for systems with fewer cores (or few cores allocated to the docker engine). If one needs precise permormance data or runs into out-of-memory issues, this parallelism can be disabled by adding the `-e RUSLIC_THREAD_COUNT=1` flag to the docker commands (i.e. `docker run -e RUSLIC_MULTITHREADED=1 ...`), the default value is `8`.
 
 #### Rust, SuSLik and Verifier categories
 
@@ -157,16 +157,16 @@ The full output includes all categories, even some sub-categories which are not 
 Additionally, stats per function are also reported, for example
 
 ```text
-stack.rs::List::<T>::new - 0_204ms [1/3/3/5] | spec_ast: 4, pfn_ast: {"List::<T>::len": 14, "Node::<T>::len": 16}
+stack.rs::List::<T>::new - 0_124ms [1/3/3/5] | spec_ast: 4, pfn_ast: {"List::<T>::len": (true, 14), "Node::<T>::len_gt": (true, 16)}
 ```
 
-means that the function `List::<T>::new` was synthesized in 0.204 seconds, with 1 LOC, 3 synthesized AST nodes, 3 unsimplified synthesized AST nodes (not reported in the paper), 5 rule applications and a specification AST of size 4. Pure functions used for the specification and their size in AST nodes are also reported.
+means that the function `List::<T>::new` was synthesized in 0.204 seconds, with 1 LOC, 3 synthesized AST nodes, 3 unsimplified synthesized AST nodes (not reported in the paper), 5 rule applications and a specification AST of size 4. Pure functions used for the specification along with if they are executable and their size in AST nodes are also reported.
 
 #### 100-Crates category
 
-The test harness `.../tests/top_crates.rs` runs the tool on the top 100 crates cached in the directory `russol-alpha/ruslic/tmp/`, we use the latest version of the crates as of the creation of the artifact. It can be run with
+The test harness `.../tests/top_crates.rs` runs the tool on the top 100 crates cached in the directory `russol-alpha/ruslic/tmp/`, we use the latest version of the crates as of 31.03.2023. It can be run with
 
-> This command requires up to 32GB memory allocated to Docker and can take multiple hours to complete! The memory requirement can be reduced by disabling parallelism 
+> This command can take multiple hours to complete!
 
 ```bash
 docker run --rm -it jonasalaif/russol test --release --test top_crates -- top_crates_cached --nocapture
@@ -185,7 +185,7 @@ There are a few subtle differences between Creusot specifications and RusSOL one
 The file can be verified by running the following three commands
 
 ```bash
-docker load -i creusot.tar.gz
+docker load -i creusot-arch.tar.gz
 docker run --rm -it -v ${PWD}/russol-alpha/ruslic/tests/all:/all jonasalaif/creusot ./mlcfg /all/creusot.rs
 docker run --rm -it -v ${PWD}/russol-alpha/ruslic/tests/all:/all jonasalaif/creusot ./prove /all/creusot.mlcfg
 ```

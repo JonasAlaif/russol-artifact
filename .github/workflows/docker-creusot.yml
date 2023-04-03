@@ -31,10 +31,10 @@ jobs:
           load: true
           tags: jonasalaif/creusot:test
 
-      # - name: Run evaluation
-      #   run: |
-      #     docker run --rm -v ${PWD}/russol-alpha/ruslic/tests/all:/all jonasalaif/creusot:test ./mlcfg /all/creusot.rs
-      #     docker run --rm -v ${PWD}/russol-alpha/ruslic/tests/all:/all jonasalaif/creusot:test ./prove /all/creusot.mlcfg
+      - name: Run evaluation
+        run: |
+          docker run --rm --network none -v ${PWD}/russol-alpha/ruslic/tests/all:/all jonasalaif/creusot:test ./mlcfg /all/creusot.rs
+          docker run --rm --network none -v ${PWD}/russol-alpha/ruslic/tests/all:/all jonasalaif/creusot:test ./prove /all/creusot.mlcfg
 
       - name: Push Creusot image
         uses: docker/build-push-action@v4
