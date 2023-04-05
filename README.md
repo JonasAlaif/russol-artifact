@@ -137,15 +137,15 @@ There are two main points to be checked for the evaluation; the results from Tab
 The categories "Rust", "SuSLik" and "Verifier" are contained in respective directories inside `russol-alpha/ruslic/tests/synth/paper`. They can all be synthesized by running the test harness `.../tests/ci.rs` with
 
 ```bash
-docker run --rm -it -v ${PWD}/russol-alpha/ruslic/tests/synth/paper:/home/sbtuser/russol-alpha/ruslic/tests/synth/paper jonasalaif/russol test --release --test ci -- all_tests --nocapture
+docker run --rm -it -v ${PWD}/russol-alpha/ruslic/tests:/home/sbtuser/russol-alpha/ruslic/tests jonasalaif/russol test --release --test ci -- all_tests --nocapture
 ```
 
-> The `-v ${PWD}/russol-alpha/ruslic/tests/synth/paper:/home/sbtuser/russol-alpha/ruslic/tests/synth/paper` part is redundant, but can be included to ensure that we are running on the same tests as the ones in the artifact.
+The command outputs the results table both to stdout and `/home/sbtuser/russol-alpha/ruslic/ruslic/tests/ci-results.txt`. The `-v ${PWD}/russol-alpha/ruslic/tests:/home/sbtuser/russol-alpha/ruslic/tests` part ensures that this file is also saved to the local file system (at `.../tests/ci-results.txt`). It also ensures that we are running on the same tests as the ones in the artifact.
 
-After synthesizing all of the test cases, a table similar (time results will vary) to the one found at `.../tests/ci-results.txt` will be printed. This table contains a summary of the results for each category, for example
+The resulting table should look similar (time results will vary) to the one found at `.../tests/ci-expected.txt` and can be compared to the one in the paper. The outputted table contains a summary of the results for each category, for example
 
 ```text
- rust  Solved 50  Time 1.1s  SOL rules 32.98  Rust LOC 6.16  Code/Spec 1.27  Sln nodes 19.20  Ann nodes 14.42  Non-exec pure fn nodes 0.72
+rust                   Solved 50 	 Time 1.3s 	 SOL rules 32.98 	 Rust LOC 6.16 	 Code/Spec 1.27 | Overhead data: Sln nodes 19.20 	 Ann nodes 14.42 	 Non-exec pure fn nodes 0.72
 ```
 
 The annotation overhead (Code/Spec) is reported as the ratio of the number of synthesized solution AST nodes to the *total* number of annotation AST nodes. The pure function AST nodes are included in the annotation count only if they return a type not usable outside of specification (e.g. `Set<T>`).
@@ -168,17 +168,21 @@ means that the function `List::<T>::new` was synthesized in 0.204 seconds, with 
 
 #### 100-Crates category
 
-The test harness `.../tests/top_crates.rs` runs the tool on the top 100 crates cached in the directory `russol-alpha/ruslic/tmp/`, we use the latest version of the crates as of 31.03.2023. It can be run with
+The test harness `.../tests/top_crates.rs` runs the tool on the top 100 crates cached in the directory `.../tests/top_100_crates/`, we use the latest version of the crates as of 31.03.2023. It can be run with
 
-> This command can take multiple hours to complete!
+> This command can take multiple hours to complete! On computers with better specs one can (significantly) reduce execution time by giving the Docker image access to >10 CPUs and `X`gb Memory and running the command with `-e RUSLIC_THREAD_COUNT=X` (where `X` is e.g. `32`).
 
 ```bash
-docker run --rm -it jonasalaif/russol test --release --test top_crates -- top_crates_cached --nocapture
+docker run --rm -it -v ${PWD}/russol-alpha/ruslic/tests:/home/sbtuser/russol-alpha/ruslic/tests jonasalaif/russol test --release --test top_crates -- top_crates_cached --nocapture
 ```
 
-At the end it will print a summary of the results, which should look similar to that included in `.../tests/crates-results.txt`.
+At the end it will print a summary of the results (and write them to `.../tests/crates-results.txt`), which should look similar to that included in `.../tests/crates-expected.txt`.
 
 The tool can also be run on the current latest version of the top 100 crates from crates.io by replacing `top_crates_cached` with `top_crates_all` in the above command.
+
+#### Full output
+
+Again the full output is not shown, but can be enabled by running with `-e RUSLIC_EVAL=false`. Along with printing average statistics for all crates combined, the full output also breaks them down per crate.
 
 ### Creusot
 
@@ -198,7 +202,7 @@ docker run --rm -it -v ${PWD}/russol-alpha/ruslic/tests/all:/all jonasalaif/creu
 
 The first command loads the Creusot image, the second command runs Creusot to generate a `.mlcfg` proof goal file, and the third command runs `why3` to try and automatically prove all goals in this file.
 
-We include the expected proof goal file in the artifact, at `.../tests/all/creusot_expected.mlcfg` which can be compared to the generated one (`creusot.mlcfg`) if there are any issues.
+We include the expected proof goal file in the artifact, at `.../tests/all/creusot-expected.mlcfg` which can be compared to the generated one (`creusot.mlcfg`) if there are any issues.
 
 The main changes required to adapt a file for Creusot are:
 
