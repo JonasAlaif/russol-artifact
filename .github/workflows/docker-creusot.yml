@@ -46,14 +46,6 @@ jobs:
           load: true
           tags: jonasalaif/creusot:arm64
 
-      - name: Push Creusot image
-        uses: docker/build-push-action@v4
-        with:
-          context: ./sources/creusot
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: jonasalaif/creusot:latest
-
       - name: Save Creusot images
         run: |
           docker tag jonasalaif/creusot:amd64 jonasalaif/creusot:latest
@@ -74,3 +66,8 @@ jobs:
           name: creusot-arm64.tar.gz
           path: creusot-arm64.tar.gz
           retention-days: 1
+
+      - name: Push Creusot image
+        run: |
+          docker manifest create jonasalaif/creusot:latest --amend jonasalaif/creusot:amd64 --amend jonasalaif/creusot:arm64
+          docker manifest push jonasalaif/creusot:latest
