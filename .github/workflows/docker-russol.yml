@@ -59,8 +59,10 @@ jobs:
 
       - name: Save Russol images
         run: |
+          docker pull jonasalaif/russol:amd64
           docker tag jonasalaif/russol:amd64 jonasalaif/russol:latest
           docker save jonasalaif/russol:latest | gzip > russol-amd64.tar.gz
+          docker pull jonasalaif/russol:arm64
           docker tag jonasalaif/russol:arm64 jonasalaif/russol:latest
           docker save jonasalaif/russol:latest | gzip > russol-arm64.tar.gz
 
