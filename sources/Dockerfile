@@ -24,7 +24,7 @@ RUN cargo test --release --no-run
 
 # Build suslik
 ENV SUSLIK_DIR=/home/sbtuser/russol-alpha/suslik
-RUN cargo run --release --bin ruslic ruslic/tests/synth/paper/rust/custom/general/clone.rs
+RUN cargo run --release --bin ruslic ruslic/tests/synth/paper/rust/c-custom/general/clone.rs
 
 # Prefetch crates for demo
 COPY --chown=sbtuser demo /home/sbtuser/demo
