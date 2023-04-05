@@ -30,6 +30,7 @@ jobs:
           context: ./sources/creusot
           platforms: linux/amd64
           load: true
+          push: true
           tags: jonasalaif/creusot:amd64
 
       - name: Run evaluation
@@ -44,6 +45,7 @@ jobs:
           context: ./sources/creusot
           platforms: linux/arm64
           load: true
+          push: true
           tags: jonasalaif/creusot:arm64
 
       - name: Save Creusot images

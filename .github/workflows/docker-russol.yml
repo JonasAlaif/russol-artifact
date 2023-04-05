@@ -30,6 +30,7 @@ jobs:
           context: ./sources
           platforms: linux/amd64
           load: true
+          push: true
           tags: jonasalaif/russol:amd64
 
       - name: Run evaluation intro
@@ -55,6 +56,7 @@ jobs:
           context: ./sources
           platforms: linux/arm64
           load: true
+          push: true
           tags: jonasalaif/russol:arm64
 
       - name: Save Russol images
