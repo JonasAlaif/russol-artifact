@@ -37,8 +37,8 @@ jobs:
           cd sources
           docker run --rm --network none -v ${PWD}/demo.rs:/demo.rs jonasalaif/russol:amd64 run --release --bin ruslic /demo.rs
           docker run --rm --network none jonasalaif/russol:amd64 run --release --bin cargo-russol -- --manifest-path=/home/sbtuser/demo/Cargo.toml
-          docker run --rm --network none -v ${PWD}/russol-alpha/ruslic/tests/synth/paper/rust/stackoverflow/reborrow.rs:/reborrow.rs jonasalaif/russol:amd64 run --release --bin ruslic /reborrow.rs
-          docker run --rm --network none -v ${PWD}/russol-alpha/ruslic/tests/synth/paper/rust/custom/list_ex/list_paper.rs:/list_paper.rs jonasalaif/russol:amd64 run --release --bin ruslic /list_paper.rs
+          docker run --rm --network none -v ${PWD}/russol-alpha/ruslic/tests/synth/paper/rust/b-stackoverflow/reborrow.rs:/reborrow.rs jonasalaif/russol:amd64 run --release --bin ruslic /reborrow.rs
+          docker run --rm --network none -v ${PWD}/russol-alpha/ruslic/tests/synth/paper/rust/c-custom/list_ex/list_paper.rs:/list_paper.rs jonasalaif/russol:amd64 run --release --bin ruslic /list_paper.rs
       - name: Run evaluation benchmarks
         run: |
           cd sources

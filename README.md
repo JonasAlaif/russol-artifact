@@ -106,18 +106,18 @@ The artifact includes the tools required to verify all of our claims. We describ
 
 ## Section 1
 
-The StackOverflow example from Fig. 1 can be found at `russol-alpha/ruslic/tests/synth/paper/rust/stackoverflow/reborrow.rs`. It can be synthesized by running the tool on a single file as described above
+The StackOverflow example from Fig. 1 can be found at `russol-alpha/ruslic/tests/synth/paper/rust/b-stackoverflow/reborrow.rs`. It can be synthesized by running the tool on a single file as described above
 
 ```bash
-docker run --rm -it -v ${PWD}/russol-alpha/ruslic/tests/synth/paper/rust/stackoverflow/reborrow.rs:/reborrow.rs jonasalaif/russol run --release --bin ruslic /reborrow.rs
+docker run --rm -it -v ${PWD}/russol-alpha/ruslic/tests/synth/paper/rust/b-stackoverflow/reborrow.rs:/reborrow.rs jonasalaif/russol run --release --bin ruslic /reborrow.rs
 ```
 
 ## Section 2
 
-The running example from this section can be found at `russol-alpha/ruslic/tests/synth/paper/rust/custom/list_ex/list_paper.rs`. All of the functions can be synthesized in one go with
+The running example from this section can be found at `russol-alpha/ruslic/tests/synth/paper/rust/c-custom/list_ex/list_paper.rs`. All of the functions can be synthesized in one go with
 
 ```bash
-docker run --rm -it -v ${PWD}/russol-alpha/ruslic/tests/synth/paper/rust/custom/list_ex/list_paper.rs:/list_paper.rs jonasalaif/russol run --release --bin ruslic /list_paper.rs
+docker run --rm -it -v ${PWD}/russol-alpha/ruslic/tests/synth/paper/rust/c-custom/list_ex/list_paper.rs:/list_paper.rs jonasalaif/russol run --release --bin ruslic /list_paper.rs
 ```
 
 The order of the functions is the same as presented in the paper, though the names of some of the functions are changed to avoid clashes. There is also an additional `pop` function, which is not mentioned in the paper.
@@ -150,7 +150,7 @@ rust                   Solved 50 	 Time 1.3s 	 SOL rules 32.98 	 Rust LOC 6.16 	
 
 The annotation overhead (Code/Spec) is reported as the ratio of the number of synthesized solution AST nodes to the *total* number of annotation AST nodes. The pure function AST nodes are included in the annotation count only if they return a type not usable outside of specification (e.g. `Set<T>`).
 
-The two failing cases can be found under `.../tests/synth/paper/rust/stackoverflow/swap_enum.rs` and at the end of `.../tests/synth/paper/suslik/rose-tree_multi-list/rose-tree_multi-list.rs`. They are not tested by the command above, but can be uncommented and synthesized individually (as described above).
+The two failing cases can be found under `.../tests/synth/paper/rust/b-stackoverflow/swap_enum.rs` and at the end of `.../tests/synth/paper/suslik/d-list_of_lists/multi-list.rs`. They are not tested by the command above, but can be uncommented and synthesized individually (as described above).
 
 #### Full output
 
