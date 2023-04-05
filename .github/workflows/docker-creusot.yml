@@ -29,7 +29,6 @@ jobs:
         with:
           context: ./sources/creusot
           platforms: linux/amd64
-          load: true
           push: true
           tags: jonasalaif/creusot:amd64
 
@@ -44,7 +43,6 @@ jobs:
         with:
           context: ./sources/creusot
           platforms: linux/arm64
-          load: true
           push: true
           tags: jonasalaif/creusot:arm64
 
