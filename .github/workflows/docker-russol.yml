@@ -3,7 +3,7 @@ name: Build Russol Docker image
 on:
   push:
     branches: 'main'
-    paths: ['russol-alpha', 'demo/**', '.github/workflows/docker-russol.yml']
+    paths: ['sources/russol-alpha', 'sources/demo/**', '.github/workflows/docker-russol.yml']
 
 jobs:
   docker:

@@ -3,7 +3,7 @@ name: Build Creusot Docker image
 on:
   push:
     branches: 'main'
-    paths: ['creusot/**', '.github/workflows/docker-creusot.yml']
+    paths: ['sources/creusot/**', '.github/workflows/docker-creusot.yml']
 
 jobs:
   docker:
