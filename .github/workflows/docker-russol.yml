@@ -24,31 +24,62 @@ jobs:
           username: jonasalaif
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Russol image
+      - name: Build amd64 Russol image
         uses: docker/build-push-action@v4
         with:
-          context: .
+          context: ./sources
+          platforms: linux/amd64
           load: true
-          tags: jonasalaif/russol:test
+          tags: jonasalaif/russol:amd64
 
       - name: Run evaluation intro
         run: |
-          docker run --rm --network none -v ${PWD}/demo.rs:/demo.rs jonasalaif/russol:test run --release --bin ruslic /demo.rs
-          docker run --rm --network none -v ${PWD}/demo:/demo jonasalaif/russol:test run --release --bin cargo-russol -- --manifest-path=/demo/Cargo.toml
-          docker run --rm --network none -v ${PWD}/russol-alpha/ruslic/tests/synth/paper/rust/stackoverflow/reborrow.rs:/reborrow.rs jonasalaif/russol:test run --release --bin ruslic /reborrow.rs
-          docker run --rm --network none -v ${PWD}/russol-alpha/ruslic/tests/synth/paper/rust/custom/list_ex/list_paper.rs:/list_paper.rs jonasalaif/russol:test run --release --bin ruslic /list_paper.rs
+          cd sources
+          docker run --rm --network none -v ${PWD}/demo.rs:/demo.rs jonasalaif/russol:amd64 run --release --bin ruslic /demo.rs
+          docker run --rm --network none -v ${PWD}/demo:/demo jonasalaif/russol:amd64 run --release --bin cargo-russol -- --manifest-path=/demo/Cargo.toml
+          docker run --rm --network none -v ${PWD}/russol-alpha/ruslic/tests/synth/paper/rust/stackoverflow/reborrow.rs:/reborrow.rs jonasalaif/russol:amd64 run --release --bin ruslic /reborrow.rs
+          docker run --rm --network none -v ${PWD}/russol-alpha/ruslic/tests/synth/paper/rust/custom/list_ex/list_paper.rs:/list_paper.rs jonasalaif/russol:amd64 run --release --bin ruslic /list_paper.rs
       - name: Run evaluation benchmarks
-        run:
-          docker run --rm --network none -v ${PWD}/russol-alpha/ruslic/tests/synth/paper:/home/sbtuser/russol-alpha/ruslic/tests/synth/paper jonasalaif/russol:test test --release --test ci -- all_tests --nocapture
+        run: |
+          cd sources
+          docker run --rm --network none -v ${PWD}/russol-alpha/ruslic/tests/synth/paper:/home/sbtuser/russol-alpha/ruslic/tests/synth/paper jonasalaif/russol:amd64 test --release --test ci -- all_tests --nocapture
       # Skip due to very long runtime:
       # - name: Run evaluation top 100 crates
-      #   run:
-      #     docker run --rm jonasalaif/russol:test test --release --test top_crates -- top_crates_cached --nocapture
+      #   run: |
+      #     cd sources
+      #     docker run --rm jonasalaif/russol:amd64 test --release --test top_crates -- top_crates_cached --nocapture
+
+      - name: Build arm64 Russol image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./sources
+          platforms: linux/arm64
+          load: true
+          tags: jonasalaif/russol:arm64
 
       - name: Push Russol image
         uses: docker/build-push-action@v4
         with:
-          context: .
+          context: ./sources
           platforms: linux/amd64,linux/arm64
           push: true
           tags: jonasalaif/russol:latest
+
+      - name: Save Russol images
+        run: |
+          docker save jonasalaif/russol:amd64 | gzip > russol-amd64.tar.gz
+          docker save jonasalaif/russol:arm64 | gzip > russol-arm64.tar.gz
+
+      - name: Upload artifact russol-amd64
+        uses: actions/upload-artifact@v3
+        with:
+          name: russol-amd64.tar.gz
+          path: russol-amd64.tar.gz
+          retention-days: 1
+
+      - name: Upload artifact russol-arm64
+        uses: actions/upload-artifact@v3
+        with:
+          name: russol-arm64.tar.gz
+          path: russol-arm64.tar.gz
+          retention-days: 1

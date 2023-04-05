@@ -15,8 +15,10 @@ jobs:
 
       - name: Create sources zip
         run: |
+          cd sources
           chmod o+rw -R demo
-          zip -r sources.zip creusot demo russol-alpha .dockerignore demo.rs Dockerfile STRUCTURE.md -x **/.git
+          zip -r ../sources.zip creusot demo russol-alpha .dockerignore demo.rs Dockerfile STRUCTURE.md -x **/.git
+          cd ..
           zip -r artifact.zip sources.zip LICENSE README.md
 
       - name: Upload artifact

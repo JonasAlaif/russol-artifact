@@ -1,19 +1,23 @@
 # Getting started
 
-Our artifact is provided as a Docker image, which can be run using any recent version of [Docker](https://docs.docker.com/get-docker/). Please start by unzipping the `sources.zip` file to the root of the artifact.
+Our artifact is provided as a Docker image, which can be run using any recent version of [Docker](https://docs.docker.com/get-docker/). Please start by unzipping the `sources.zip` file to the root of the artifact, such that running `ls sources/russol-alpha` from the root of the artifact succeeds.
 
-**Unzip to the root**, you should *not* have a `./sources/` directory, but instead a `./russol-alpha/` directory at the same level as this `README.md`!
+All commands should be run from the `sources` directory
+
+```bash
+cd sources
+```
 
 ## Using the image
 
 > If any of the commands in this section do not work for you, take a look at [alternatives](#alternatives).
 
-With `docker` installed and in your path, start by loading the `russol` image from the included file. From the root of the artifact, run the following command
+With `docker` installed and in your path, start by loading the `russol` image from the included file. Run the following command
 
 > The `creusot` image is only required for the [Creusot subsection](#creusot), and can be ignored for now.
 
 ```bash
-docker load -i russol-arch.tar.gz
+docker load -i ../russol-arch.tar.gz
 ```
 
 We provide images for the `arm64` (Apple sillicon Macs) and `amd64` (most other computers) architectures, if you are on a different architecture you will see the following warning:
@@ -71,7 +75,7 @@ chmod o+rw -R demo
 
 ## Structure of the artifact
 
-The structure of the artifact is detailed in the [`STRUCTURE.md`](STRUCTURE.md) file.
+The structure of the artifact is detailed in the [`STRUCTURE.md`](sources/STRUCTURE.md) file.
 
 ## Advanced use of the image
 
@@ -126,7 +130,7 @@ There are two main points to be checked for the evaluation; the results from Tab
 
 ### Table 1
 
-**Note on parallelism**: The execution times of the commands in this section are drastically reduced by synthesizing all functions within a file/crate in parallel. The tool enables this by default, but it may lead to slightly longer recorded synthesis times per funtion, especially for systems with fewer cores (or few cores allocated to the docker engine). If one needs precise permormance data or runs into out-of-memory issues, this parallelism can be disabled by adding the `-e RUSLIC_THREAD_COUNT=1` flag to the docker commands (i.e. `docker run -e RUSLIC_MULTITHREADED=1 ...`), the default value is `8`.
+**Note on parallelism**: The execution times of the commands in this section are drastically reduced by synthesizing all functions within a file/crate in parallel. The tool enables this by default, but it may lead to slightly longer recorded synthesis times per funtion, especially for systems with fewer cores (or few cores allocated to the docker engine). If one needs precise permormance data or runs into out-of-memory issues, this parallelism can be disabled by adding the `-e RUSLIC_THREAD_COUNT=1` flag to the docker commands (i.e. `docker run -e RUSLIC_THREAD_COUNT=1 ...`), the default value is `8`.
 
 #### Rust, SuSLik and Verifier categories
 
@@ -185,7 +189,7 @@ There are a few subtle differences between Creusot specifications and RusSOL one
 The file can be verified by running the following three commands
 
 ```bash
-docker load -i creusot-arch.tar.gz
+docker load -i ../creusot-arch.tar.gz
 docker run --rm -it -v ${PWD}/russol-alpha/ruslic/tests/all:/all jonasalaif/creusot ./mlcfg /all/creusot.rs
 docker run --rm -it -v ${PWD}/russol-alpha/ruslic/tests/all:/all jonasalaif/creusot ./prove /all/creusot.mlcfg
 ```
