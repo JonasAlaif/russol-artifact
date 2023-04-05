@@ -18,11 +18,12 @@ jobs:
           cd sources
           chmod o+rw -R demo
           zip -r ../sources.zip creusot demo russol-alpha .dockerignore demo.rs Dockerfile STRUCTURE.md -x **/.git
-          cd ..
-          zip -r artifact.zip sources.zip LICENSE README.md
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: artifact.zip
-          path: artifact.zip
+          path: |
+            sources.zip
+            LICENSE
+            README.md

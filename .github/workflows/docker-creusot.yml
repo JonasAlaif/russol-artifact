@@ -56,8 +56,10 @@ jobs:
 
       - name: Save Creusot images
         run: |
-          docker save jonasalaif/creusot:amd64 | gzip > creusot-amd64.tar.gz
-          docker save jonasalaif/creusot:arm64 | gzip > creusot-arm64.tar.gz
+          docker tag jonasalaif/creusot:amd64 jonasalaif/creusot:latest
+          docker save jonasalaif/creusot:latest | gzip > creusot-amd64.tar.gz
+          docker tag jonasalaif/creusot:arm64 jonasalaif/creusot:latest
+          docker save jonasalaif/creusot:latest | gzip > creusot-arm64.tar.gz
 
       - name: Upload artifact creusot-amd64
         uses: actions/upload-artifact@v3

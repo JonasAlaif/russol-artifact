@@ -67,8 +67,10 @@ jobs:
 
       - name: Save Russol images
         run: |
-          docker save jonasalaif/russol:amd64 | gzip > russol-amd64.tar.gz
-          docker save jonasalaif/russol:arm64 | gzip > russol-arm64.tar.gz
+          docker tag jonasalaif/russol:amd64 jonasalaif/russol:latest
+          docker save jonasalaif/russol:latest | gzip > russol-amd64.tar.gz
+          docker tag jonasalaif/russol:arm64 jonasalaif/russol:latest
+          docker save jonasalaif/russol:latest | gzip > russol-arm64.tar.gz
 
       - name: Upload artifact russol-amd64
         uses: actions/upload-artifact@v3
