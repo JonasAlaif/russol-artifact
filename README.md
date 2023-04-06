@@ -154,7 +154,7 @@ The two failing cases can be found under `.../tests/synth/paper/rust/b-stackover
 
 #### Full output
 
-The test above printed only a reduced output for easier comparison to the table. To print the full output add `-e RUSLIC_EVAL=false` to the command (i.e. `docker run -e RUSLIC_EVAL=false ...`). This flag only affects the formatting of the benchmarking results.
+The test above printed only a reduced output for easier comparison to the table. To print the full output add `-e RUSLIC_EVAL=false` to the command (i.e. `docker run -e RUSLIC_EVAL=false ...`). This flag only affects the formatting of the benchmarking results. The expected full output can be found at `.../tests/ci-expected-full.txt`.
 
 The full output includes all categories, even some sub-categories which are not mentioned/included in the paper. The results for each category now also list the used pure functions along with their AST nodes and whether they are counted as executable.
 
@@ -164,7 +164,7 @@ Additionally, stats per function are also reported, for example
 stack.rs::List::<T>::new - 0_124ms [1/3/3/5] | spec_ast: 4, pfn_ast: {"List::<T>::len": (true, 14), "Node::<T>::len_gt": (true, 16)}
 ```
 
-means that the function `List::<T>::new` was synthesized in 0.204 seconds, with 1 LOC, 3 synthesized AST nodes, 3 unsimplified synthesized AST nodes (not reported in the paper), 5 rule applications and a specification AST of size 4. Pure functions used for the specification along with if they are executable and their size in AST nodes are also reported.
+means that the function `List::<T>::new` was synthesized in 0.124 seconds, with 1 LOC, 3 synthesized AST nodes, 3 unsimplified synthesized AST nodes (not reported in the paper), 5 rule applications and a specification AST of size 4. Pure functions used for the specification along with if they are executable and their size in AST nodes are also reported.
 
 #### 100-Crates category
 
@@ -182,7 +182,7 @@ The tool can also be run on the current latest version of the top 100 crates fro
 
 #### Full output
 
-Again the full output is not shown, but can be enabled by running with `-e RUSLIC_EVAL=false`. Along with printing average statistics for all crates combined, the full output also breaks them down per crate.
+Again the full output is not shown, but can be enabled by running with `-e RUSLIC_EVAL=false`. Along with printing average statistics for all crates combined, the full output also breaks them down per crate. The expected full output can be found at `.../tests/crates-expected-full.txt`.
 
 ### Creusot
 
