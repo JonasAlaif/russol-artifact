@@ -26,10 +26,8 @@ jobs:
 
       - name: Build amd64 Creusot image
         run: |
-          docker build -t jonasalaif/creusot:amd64 ./sources/creusot
+          docker buildx build --platform linux/amd64 -t jonasalaif/creusot:amd64 ./sources/creusot
           docker push jonasalaif/creusot:amd64
-        env:
-          DOCKER_DEFAULT_PLATFORM: linux/amd64
 
       - name: Run evaluation
         run: |
@@ -39,10 +37,8 @@ jobs:
 
       - name: Build arm64 Creusot image
         run: |
-          docker build -t jonasalaif/creusot:arm64 ./sources/creusot
+          docker buildx build --platform linux/arm64 -t jonasalaif/creusot:arm64 ./sources/creusot
           docker push jonasalaif/creusot:arm64
-        env:
-          DOCKER_DEFAULT_PLATFORM: linux/arm64
 
       - name: Save Creusot images
         run: |
@@ -67,5 +63,5 @@ jobs:
 
       - name: Push Creusot image
         run: |
-          docker manifest create jonasalaif/creusot:latest --amend jonasalaif/creusot:amd64 --amend jonasalaif/creusot:arm64
+          docker manifest create jonasalaif/creusot:latest jonasalaif/creusot:amd64 jonasalaif/creusot:arm64
           docker manifest push jonasalaif/creusot:latest
