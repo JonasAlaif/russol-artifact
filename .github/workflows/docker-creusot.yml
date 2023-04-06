@@ -26,7 +26,7 @@ jobs:
 
       - name: Build amd64 Creusot image
         run: |
-          docker buildx build --platform linux/amd64 -t jonasalaif/creusot:amd64 ./sources/creusot
+          docker buildx build --platform linux/amd64 --load -t jonasalaif/creusot:amd64 ./sources/creusot
           docker push jonasalaif/creusot:amd64
 
       - name: Run evaluation
@@ -37,7 +37,7 @@ jobs:
 
       - name: Build arm64 Creusot image
         run: |
-          docker buildx build --platform linux/arm64 -t jonasalaif/creusot:arm64 ./sources/creusot
+          docker buildx build --platform linux/arm64 --load -t jonasalaif/creusot:arm64 ./sources/creusot
           docker push jonasalaif/creusot:arm64
 
       - name: Save Creusot images
