@@ -5,6 +5,9 @@ on:
     branches: 'main'
     paths: ['!.github/**', '.github/workflows/package-artifact.yml']
 
+permissions:
+  contents: write
+
 jobs:
   package:
     runs-on: ubuntu-latest

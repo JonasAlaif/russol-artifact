@@ -5,6 +5,9 @@ on:
     branches: 'main'
     paths: ['sources/creusot/**', '.github/workflows/docker-creusot.yml']
 
+permissions:
+  contents: write
+
 jobs:
   docker:
     strategy:

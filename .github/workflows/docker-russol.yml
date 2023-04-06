@@ -5,6 +5,9 @@ on:
     branches: 'main'
     paths: ['sources/russol-alpha', 'sources/demo/**', 'sources/Dockerfile', '.github/workflows/docker-russol.yml']
 
+permissions:
+  contents: write
+
 jobs:
   docker:
     strategy:
