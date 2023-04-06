@@ -55,7 +55,7 @@ jobs:
         run: |
           docker push jonasalaif/russol:${{ matrix.arch }}
           docker tag jonasalaif/russol:${{ matrix.arch }} jonasalaif/russol:latest
-          docker save jonasalaif/russol:latest | gzip > russol-${{ matrix.arch }}.tar.gz
+          docker save jonasalaif/russol:latest | gzip -9 > russol-${{ matrix.arch }}.tar.gz
 
       - name: Upload release russol-${{ matrix.arch }}
         uses: softprops/action-gh-release@v1
