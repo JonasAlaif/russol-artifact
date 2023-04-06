@@ -26,8 +26,10 @@ jobs:
 
       - name: Build amd64 Russol image
         run: |
-          docker build --platform linux/amd64 -t jonasalaif/russol:amd64 ./sources
+          docker build -t jonasalaif/russol:amd64 ./sources
           docker push jonasalaif/russol:amd64
+        env:
+          DOCKER_DEFAULT_PLATFORM: linux/amd64
 
       - name: Run evaluation intro
         run: |
@@ -51,8 +53,10 @@ jobs:
 
       - name: Build arm64 Russol image
         run: |
-          docker build --platform linux/arm64 -t jonasalaif/russol:arm64 ./sources
+          docker build -t jonasalaif/russol:arm64 ./sources
           docker push jonasalaif/russol:arm64
+        env:
+          DOCKER_DEFAULT_PLATFORM: linux/arm64
 
       - name: Save Russol images
         run: |
