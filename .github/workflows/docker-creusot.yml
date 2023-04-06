@@ -41,12 +41,13 @@ jobs:
           docker push jonasalaif/creusot:${{ matrix.arch }}
           docker tag jonasalaif/creusot:${{ matrix.arch }} jonasalaif/creusot:latest
           docker save jonasalaif/creusot:latest | gzip > creusot-${{ matrix.arch }}.tar.gz
-      - name: Upload artifact creusot-${{ matrix.arch }}
-        uses: actions/upload-artifact@v3
+
+      - name: Upload release creusot-${{ matrix.arch }}
+        uses: softprops/action-gh-release@v1
         with:
-          retention-days: 1
-          name: creusot-${{ matrix.arch }}.tar.gz
-          path: creusot-${{ matrix.arch }}.tar.gz
+          tag_name: latest
+          files: creusot-${{ matrix.arch }}.tar.gz
+
       - name: Clean up after ${{ matrix.arch }} Creusot image
         run: |
           rm creusot-${{ matrix.arch }}.tar.gz

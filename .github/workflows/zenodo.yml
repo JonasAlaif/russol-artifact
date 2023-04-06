@@ -1,0 +1,35 @@
+name: Publish new version on Zenodo
+
+on:
+  workflow_dispatch:
+
+env:
+  zenodo_deposition_id: 1181476
+  zenodo_server: 'https://sandbox.zenodo.org'
+
+jobs:
+  new_version:
+    name: Create new version of zenodo deposition
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Download release
+        run: |
+          ls -la
+          gh release download latest
+          ls -la
+
+      # - uses: kykrueger/zenodo-new-version@v1.0.2
+      #   with:
+      #     zenodo_deposition_id: ${{ env.zenodo_deposition_id }}
+      #     zenodo_server: ${{ env.zenodo_server }}
+      #     zenodo_token: ${{ secrets.ZENODO_SANDBOX_TOKEN }}
+      # - uses: kykrueger/zenodo-publish@v1.0.4
+      #   with:
+      #     zenodo_deposition_id: ${{ env.zenodo_deposition_id }}
+      #     zenodo_server: ${{ env.zenodo_server }}
+      #     zenodo_token: ${{ secrets.ZENODO_SANDBOX_TOKEN }}
+      # - uses: EndBug/add-and-commit@v7.1.1
+      #   with:
+      #     message: 'published to Zenodo'
