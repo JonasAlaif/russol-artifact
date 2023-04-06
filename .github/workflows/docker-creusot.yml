@@ -7,6 +7,9 @@ on:
 
 jobs:
   docker:
+    strategy:
+        matrix:
+          arch: [amd64, arm64]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -24,43 +27,44 @@ jobs:
           username: jonasalaif
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build amd64 Creusot image
-        run: |
-          docker buildx build --platform linux/amd64 --load -t jonasalaif/creusot:amd64 ./sources/creusot
-          docker push jonasalaif/creusot:amd64
+      - name: Build ${{ matrix.arch }} Creusot image
+        run: docker buildx build --platform linux/${{ matrix.arch }} --load -t jonasalaif/creusot:${{ matrix.arch }} ./sources/creusot
 
       - name: Run evaluation
         run: |
           cd sources
-          docker run --rm --network none -v ${PWD}/russol-alpha/ruslic/tests/all:/all jonasalaif/creusot:amd64 ./mlcfg /all/creusot.rs
-      #     docker run --rm --network none -v ${PWD}/russol-alpha/ruslic/tests/all:/all jonasalaif/creusot:amd64 ./prove /all/creusot.mlcfg
+          docker run --rm --network none -v ${PWD}/russol-alpha/ruslic/tests/all:/all jonasalaif/creusot:${{ matrix.arch }} ./mlcfg /all/creusot.rs
+      #     docker run --rm --network none -v ${PWD}/russol-alpha/ruslic/tests/all:/all jonasalaif/creusot:${{ matrix.arch }} ./prove /all/creusot.mlcfg
 
-      - name: Build arm64 Creusot image
+      - name: Save ${{ matrix.arch }} Creusot image
         run: |
-          docker buildx build --platform linux/arm64 --load -t jonasalaif/creusot:arm64 ./sources/creusot
-          docker push jonasalaif/creusot:arm64
-
-      - name: Save Creusot images
-        run: |
-          docker tag jonasalaif/creusot:amd64 jonasalaif/creusot:latest
-          docker save jonasalaif/creusot:latest | gzip > creusot-amd64.tar.gz
-          docker tag jonasalaif/creusot:arm64 jonasalaif/creusot:latest
-          docker save jonasalaif/creusot:latest | gzip > creusot-arm64.tar.gz
-
-      - name: Upload artifact creusot-amd64
+          docker push jonasalaif/creusot:${{ matrix.arch }}
+          docker tag jonasalaif/creusot:${{ matrix.arch }} jonasalaif/creusot:latest
+          docker save jonasalaif/creusot:latest | gzip > creusot-${{ matrix.arch }}.tar.gz
+      - name: Upload artifact creusot-${{ matrix.arch }}
         uses: actions/upload-artifact@v3
         with:
-          name: creusot-amd64.tar.gz
-          path: creusot-amd64.tar.gz
+          name: creusot-${{ matrix.arch }}.tar.gz
+          path: creusot-${{ matrix.arch }}.tar.gz
           retention-days: 1
+      - name: Clean up after ${{ matrix.arch }} Creusot image
+        run: |
+          rm creusot-${{ matrix.arch }}.tar.gz
+          docker rmi jonasalaif/creusot
 
-      - name: Upload artifact creusot-arm64
-        uses: actions/upload-artifact@v3
+  upload-latest:
+    runs-on: ubuntu-latest
+    needs: [docker]
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
         with:
-          name: creusot-arm64.tar.gz
-          path: creusot-arm64.tar.gz
-          retention-days: 1
-
+          username: jonasalaif
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Push Creusot image
         run: |
           docker manifest create jonasalaif/creusot:latest jonasalaif/creusot:amd64 jonasalaif/creusot:arm64

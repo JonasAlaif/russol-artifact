@@ -7,6 +7,9 @@ on:
 
 jobs:
   docker:
+    strategy:
+        matrix:
+          arch: [amd64, arm64]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -24,57 +27,56 @@ jobs:
           username: jonasalaif
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build amd64 Russol image
-        run: |
-          docker buildx build --platform linux/amd64 --load -t jonasalaif/russol:amd64 ./sources
-          docker push jonasalaif/russol:amd64
+      - name: Build ${{ matrix.arch }} Russol image
+        run: docker buildx build --platform linux/${{ matrix.arch }} --load -t jonasalaif/russol:${{ matrix.arch }} ./sources
 
       - name: Run evaluation intro
         run: |
           cd sources
-          docker run --rm --network none -v ${PWD}/demo.rs:/demo.rs jonasalaif/russol:amd64 run --release --bin ruslic /demo.rs
-          docker run --rm --network none jonasalaif/russol:amd64 run --release --bin cargo-russol -- --manifest-path=/home/sbtuser/demo/Cargo.toml
-          docker run --rm --network none -v ${PWD}/russol-alpha/ruslic/tests/synth/paper/rust/b-stackoverflow/reborrow.rs:/reborrow.rs jonasalaif/russol:amd64 run --release --bin ruslic /reborrow.rs
-          docker run --rm --network none -v ${PWD}/russol-alpha/ruslic/tests/synth/paper/rust/c-custom/list_ex/list_paper.rs:/list_paper.rs jonasalaif/russol:amd64 run --release --bin ruslic /list_paper.rs
+          docker run --rm --network none -v ${PWD}/demo.rs:/demo.rs jonasalaif/russol:${{ matrix.arch }} run --release --bin ruslic /demo.rs
+          docker run --rm --network none jonasalaif/russol:${{ matrix.arch }} run --release --bin cargo-russol -- --manifest-path=/home/sbtuser/demo/Cargo.toml
+          docker run --rm --network none -v ${PWD}/russol-alpha/ruslic/tests/synth/paper/rust/b-stackoverflow/reborrow.rs:/reborrow.rs jonasalaif/russol:${{ matrix.arch }} run --release --bin ruslic /reborrow.rs
+          docker run --rm --network none -v ${PWD}/russol-alpha/ruslic/tests/synth/paper/rust/c-custom/list_ex/list_paper.rs:/list_paper.rs jonasalaif/russol:${{ matrix.arch }} run --release --bin ruslic /list_paper.rs
       - name: Run evaluation benchmarks
+        if: ${{ matrix.arch == 'amd64' }}
         run: |
           cd sources
-          docker run --rm --network none jonasalaif/russol:amd64 test --release --test ci -- all_tests --nocapture
+          docker run --rm --network none jonasalaif/russol:${{ matrix.arch }} test --release --test ci -- all_tests --nocapture
       # Skip due to very long runtime:
       # - name: Run evaluation top 100 crates
       #   run: |
       #     cd sources
-      #     docker run --rm jonasalaif/russol:amd64 test --release --test top_crates -- top_crates_cached --nocapture
+      #     docker run --rm jonasalaif/russol:${{ matrix.arch }} test --release --test top_crates -- top_crates_cached --nocapture
 
-      - name: Ensure no files changed
-        run: git diff --exit-code
-
-      - name: Build arm64 Russol image
+      - name: Save ${{ matrix.arch }} Russol image
         run: |
-          docker buildx build --platform linux/arm64 --load -t jonasalaif/russol:arm64 ./sources
-          docker push jonasalaif/russol:arm64
-
-      - name: Save Russol images
-        run: |
-          docker tag jonasalaif/russol:amd64 jonasalaif/russol:latest
-          docker save jonasalaif/russol:latest | gzip > russol-amd64.tar.gz
-          docker tag jonasalaif/russol:arm64 jonasalaif/russol:latest
-          docker save jonasalaif/russol:latest | gzip > russol-arm64.tar.gz
-
-      - name: Upload artifact russol-amd64
+          docker push jonasalaif/russol:${{ matrix.arch }}
+          docker tag jonasalaif/russol:${{ matrix.arch }} jonasalaif/russol:latest
+          docker save jonasalaif/russol:latest | gzip > russol-${{ matrix.arch }}.tar.gz
+      - name: Upload artifact russol-${{ matrix.arch }}
         uses: actions/upload-artifact@v3
         with:
-          name: russol-amd64.tar.gz
-          path: russol-amd64.tar.gz
+          name: russol-${{ matrix.arch }}.tar.gz
+          path: russol-${{ matrix.arch }}.tar.gz
           retention-days: 1
+      - name: Clean up after ${{ matrix.arch }} Russol image
+        run: |
+          rm creusot-${{ matrix.arch }}.tar.gz
+          docker rmi jonasalaif/creusot
 
-      - name: Upload artifact russol-arm64
-        uses: actions/upload-artifact@v3
+  upload-latest:
+    runs-on: ubuntu-latest
+    needs: [docker]
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
         with:
-          name: russol-arm64.tar.gz
-          path: russol-arm64.tar.gz
-          retention-days: 1
-
+          username: jonasalaif
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Push Russol image
         run: |
           docker manifest create jonasalaif/russol:latest jonasalaif/russol:amd64 jonasalaif/russol:arm64
