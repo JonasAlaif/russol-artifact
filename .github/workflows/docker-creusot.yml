@@ -24,13 +24,10 @@ jobs:
           username: jonasalaif
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Creusot image
-        uses: docker/build-push-action@v4
-        with:
-          context: ./sources/creusot
-          platforms: linux/amd64
-          push: true
-          tags: jonasalaif/creusot:amd64
+      - name: Build amd64 Creusot image
+        run: |
+          docker build --platform linux/amd64 -t jonasalaif/creusot:amd64 ./sources/creusot
+          docker push jonasalaif/creusot:amd64
 
       - name: Run evaluation
         run: |
@@ -39,19 +36,14 @@ jobs:
       #     docker run --rm --network none -v ${PWD}/russol-alpha/ruslic/tests/all:/all jonasalaif/creusot:amd64 ./prove /all/creusot.mlcfg
 
       - name: Build arm64 Creusot image
-        uses: docker/build-push-action@v4
-        with:
-          context: ./sources/creusot
-          platforms: linux/arm64
-          push: true
-          tags: jonasalaif/creusot:arm64
+        run: |
+          docker build --platform linux/arm64 -t jonasalaif/creusot:arm64 ./sources/creusot
+          docker push jonasalaif/creusot:arm64
 
       - name: Save Creusot images
         run: |
-          docker pull jonasalaif/creusot:amd64
           docker tag jonasalaif/creusot:amd64 jonasalaif/creusot:latest
           docker save jonasalaif/creusot:latest | gzip > creusot-amd64.tar.gz
-          docker pull jonasalaif/creusot:arm64
           docker tag jonasalaif/creusot:arm64 jonasalaif/creusot:latest
           docker save jonasalaif/creusot:latest | gzip > creusot-arm64.tar.gz
 

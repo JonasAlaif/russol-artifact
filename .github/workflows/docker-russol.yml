@@ -25,12 +25,9 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build amd64 Russol image
-        uses: docker/build-push-action@v4
-        with:
-          context: ./sources
-          platforms: linux/amd64
-          push: true
-          tags: jonasalaif/russol:amd64
+        run: |
+          docker build --platform linux/amd64 -t jonasalaif/russol:amd64 ./sources
+          docker push jonasalaif/russol:amd64
 
       - name: Run evaluation intro
         run: |
@@ -49,20 +46,18 @@ jobs:
       #     cd sources
       #     docker run --rm jonasalaif/russol:amd64 test --release --test top_crates -- top_crates_cached --nocapture
 
+      - name: Ensure no files changed
+        run: git diff --exit-code
+
       - name: Build arm64 Russol image
-        uses: docker/build-push-action@v4
-        with:
-          context: ./sources
-          platforms: linux/arm64
-          push: true
-          tags: jonasalaif/russol:arm64
+        run: |
+          docker build --platform linux/arm64 -t jonasalaif/russol:arm64 ./sources
+          docker push jonasalaif/russol:arm64
 
       - name: Save Russol images
         run: |
-          docker pull jonasalaif/russol:amd64
           docker tag jonasalaif/russol:amd64 jonasalaif/russol:latest
           docker save jonasalaif/russol:latest | gzip > russol-amd64.tar.gz
-          docker pull jonasalaif/russol:arm64
           docker tag jonasalaif/russol:arm64 jonasalaif/russol:latest
           docker save jonasalaif/russol:latest | gzip > russol-arm64.tar.gz
 
