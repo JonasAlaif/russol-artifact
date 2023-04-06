@@ -56,13 +56,13 @@ jobs:
       - name: Upload artifact russol-${{ matrix.arch }}
         uses: actions/upload-artifact@v3
         with:
+          retention-days: 1
           name: russol-${{ matrix.arch }}.tar.gz
           path: russol-${{ matrix.arch }}.tar.gz
-          retention-days: 1
       - name: Clean up after ${{ matrix.arch }} Russol image
         run: |
-          rm creusot-${{ matrix.arch }}.tar.gz
-          docker rmi jonasalaif/creusot
+          rm russol-${{ matrix.arch }}.tar.gz
+          docker rmi jonasalaif/russol
 
   upload-latest:
     runs-on: ubuntu-latest

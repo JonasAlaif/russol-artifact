@@ -44,9 +44,9 @@ jobs:
       - name: Upload artifact creusot-${{ matrix.arch }}
         uses: actions/upload-artifact@v3
         with:
+          retention-days: 1
           name: creusot-${{ matrix.arch }}.tar.gz
           path: creusot-${{ matrix.arch }}.tar.gz
-          retention-days: 1
       - name: Clean up after ${{ matrix.arch }} Creusot image
         run: |
           rm creusot-${{ matrix.arch }}.tar.gz
