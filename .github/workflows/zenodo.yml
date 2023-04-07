@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       sandbox:
-        description: 'Should we release to the sandbox deposition'
+        description: 'Release to sandbox'
         type: boolean
         default: true
         required: false

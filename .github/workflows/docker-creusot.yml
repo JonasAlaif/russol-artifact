@@ -43,7 +43,7 @@ jobs:
         run: |
           docker push jonasalaif/creusot:${{ matrix.arch }}
           docker tag jonasalaif/creusot:${{ matrix.arch }} jonasalaif/creusot:latest
-          docker save jonasalaif/creusot:latest | gzip -9 > creusot-${{ matrix.arch }}.tar.gz
+          docker save jonasalaif/creusot:latest | gzip > creusot-${{ matrix.arch }}.tar.gz
 
       - name: Upload release creusot-${{ matrix.arch }}
         uses: softprops/action-gh-release@v1
