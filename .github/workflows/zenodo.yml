@@ -2,10 +2,17 @@ name: Publish new version on Zenodo
 
 on:
   workflow_dispatch:
+    inputs:
+      sandbox:
+        description: 'Should we release to the sandbox deposition'
+        type: boolean
+        default: true
+        required: false
 
 env:
-  zenodo_deposition_id: 1181476
-  zenodo_server: 'https://sandbox.zenodo.org'
+  DEPOSITION_ID: ${{ github.event.inputs.sandbox && '1181476' || '7794634' }}
+  SERVER: ${{ github.event.inputs.sandbox && 'https://sandbox.zenodo.org' || 'https://zenodo.org' }}
+  TOKEN: ${{ github.event.inputs.sandbox && secrets.ZENODO_SANDBOX_TOKEN || secrets.ZENODO_TOKEN }}
 
 jobs:
   new_version:
@@ -23,11 +30,11 @@ jobs:
 
       - uses: kykrueger/zenodo-new-version@v1.0.3
         with:
-          zenodo_deposition_id: ${{ env.zenodo_deposition_id }}
-          zenodo_server: ${{ env.zenodo_server }}
-          zenodo_token: ${{ secrets.ZENODO_SANDBOX_TOKEN }}
+          zenodo_deposition_id: ${{ env.DEPOSITION_ID }}
+          zenodo_server: ${{ env.SERVER }}
+          zenodo_token: ${{ env.TOKEN }}
       - uses: kykrueger/zenodo-publish@v1.0.5
         with:
-          zenodo_deposition_id: ${{ env.zenodo_deposition_id }}
-          zenodo_server: ${{ env.zenodo_server }}
-          zenodo_token: ${{ secrets.ZENODO_SANDBOX_TOKEN }}
+          zenodo_deposition_id: ${{ env.DEPOSITION_ID }}
+          zenodo_server: ${{ env.SERVER }}
+          zenodo_token: ${{ env.TOKEN }}
