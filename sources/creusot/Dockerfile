@@ -2,10 +2,10 @@ FROM ubuntu:jammy
 
 RUN \
   apt-get update && \
-  apt-get install opam autoconf -y && \
+  apt-get install opam autoconf pkg-config -y && \
   apt-get install -y --no-install-recommends z3 && \
   # Required for `why3-ide`
-  apt-get install libcairo2-dev libexpat1-dev libgtk-3-dev libgtksourceview-3.0-dev pkg-config -y && \
+# apt-get install libcairo2-dev libexpat1-dev libgtk-3-dev libgtksourceview-3.0-dev -y && \
   # Required for Rust
   apt-get install curl build-essential libssl-dev -y && \
   rm -rf /var/lib/apt/lists/*
@@ -19,11 +19,12 @@ ENV PATH=/home/cuser/.opam/default/bin:$PATH
 
 # No idea why the latest version doesn't work!
 RUN opam pin add --yes why3 https://gitlab.inria.fr/why3/why3.git#8641e4ae51c26e3aa1ee381afd8e9551e9483790
-RUN opam pin add --yes why3-ide https://gitlab.inria.fr/why3/why3.git#8641e4ae51c26e3aa1ee381afd8e9551e9483790
-RUN opam install --yes lablgtk3 lablgtk3-sourceview3 ocamlgraph why3 why3-ide
+RUN opam install --yes ocamlgraph why3
+#RUN opam pin add --yes why3-ide https://gitlab.inria.fr/why3/why3.git#8641e4ae51c26e3aa1ee381afd8e9551e9483790
+#RUN opam install --yes lablgtk3 lablgtk3-sourceview3 why3-ide
 RUN why3 config detect
 # Not needed
-# RUN sed -i 's/4.8.12/4.8.10/' /home/cuser/.why3.conf
+#RUN sed -i 's/4.8.12/4.8.10/' /home/cuser/.why3.conf
 
 # Install rust
 ENV PATH=/home/cuser/.cargo/bin:$PATH
