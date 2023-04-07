@@ -2,7 +2,7 @@ FROM sbtscala/scala-sbt:eclipse-temurin-8u352-b08_1.8.2_2.12.17
 
 RUN \
   apt-get update && \
-  apt-get install build-essential libssl-dev pkg-config git -y && \
+  apt-get install curl build-essential libssl-dev pkg-config git -y && \
   apt-get install z3 -y --no-install-recommends && \
   rm -rf /var/lib/apt/lists/*
 

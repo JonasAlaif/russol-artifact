@@ -2,7 +2,7 @@ FROM ubuntu:jammy
 
 RUN \
   apt-get update && \
-  apt-get install build-essential libssl-dev pkg-config git -y && \
+  apt-get install curl build-essential libssl-dev pkg-config git -y && \
   apt-get install z3 -y --no-install-recommends && \
   rm -rf /var/lib/apt/lists/*
 
