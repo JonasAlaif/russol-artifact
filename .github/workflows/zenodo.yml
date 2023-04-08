@@ -3,20 +3,30 @@ name: Publish new version on Zenodo
 on:
   workflow_dispatch:
     inputs:
-      sandbox:
-        description: 'Release to sandbox'
+      live:
+        description: 'Release to live Zenodo, keep disabled to use sandbox Zenodo.'
         type: boolean
-        default: true
+        default: false
+        required: false
+      publish:
+        description: 'Immediately publish new version. When disabled, files are still uploaded but new version must be published manually.'
+        type: boolean
+        default: false
+        required: false
+      keep:
+        description: 'Keep previously uploaded (unpublished) files and overwrite with new files. When disabled old files are deleted.'
+        type: boolean
+        default: false
         required: false
 
 env:
-  DEPOSITION_ID: ${{ github.event.inputs.sandbox && '1181476' || '7794634' }}
-  SERVER: ${{ github.event.inputs.sandbox && 'https://sandbox.zenodo.org' || 'https://zenodo.org' }}
-  TOKEN: ${{ github.event.inputs.sandbox && secrets.ZENODO_SANDBOX_TOKEN || secrets.ZENODO_TOKEN }}
+  DEPOSITION_ID: ${{ github.event.inputs.live == 'true' && '7794634' || '1181476' }}
+  SERVER: ${{ github.event.inputs.live == 'true' && 'https://zenodo.org' || 'https://sandbox.zenodo.org' }}
+  TOKEN: ${{ github.event.inputs.live == 'true' && secrets.ZENODO_TOKEN || secrets.ZENODO_SANDBOX_TOKEN }}
 
 jobs:
   new_version:
-    name: Create new version of zenodo deposition
+    name: ${{ github.event.inputs.publish == 'true' && 'Publish' || 'Upload' }} new version (${{ github.event.inputs.live == 'true' && 'live' || 'sandbox' }})
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -24,17 +34,70 @@ jobs:
       - name: Download release
         run: |
           gh release download latest -D release_files
-          ls release_files/* > .zenodo_whitelist_uploads
+      #    ls release_files/* > .zenodo_whitelist_uploads
         env:
             GH_TOKEN: ${{ github.token }}
+      - name: Create deposition new version
+        run: |
+          python <<EOF
+          import requests, os, json, sys
+          params = {"access_token": os.getenv("TOKEN")}
 
-      - uses: kykrueger/zenodo-new-version@v1.0.3
-        with:
-          zenodo_deposition_id: ${{ env.DEPOSITION_ID }}
-          zenodo_server: ${{ env.SERVER }}
-          zenodo_token: ${{ env.TOKEN }}
-      - uses: kykrueger/zenodo-publish@v1.0.5
-        with:
-          zenodo_deposition_id: ${{ env.DEPOSITION_ID }}
-          zenodo_server: ${{ env.SERVER }}
-          zenodo_token: ${{ env.TOKEN }}
+          SERVER = os.getenv("SERVER")
+          DEPOSITION_ID = os.getenv("DEPOSITION_ID")
+          sys.stdout.write(f"Using server {SERVER} and deposition {DEPOSITION_ID}\n")
+          r = requests.post(f"{SERVER}/api/deposit/depositions/{DEPOSITION_ID}/actions/newversion", params=params, timeout=10)
+          assert r.status_code == 201, f"{r.status_code}, {r.json()}"
+          curr_deposition = r.json()
+          sys.stdout.write(f"Current deposition: {json.dumps(curr_deposition, indent=4)}\n")
+
+          latest_draft = curr_deposition["links"]["latest_draft"]
+          env_file = os.getenv("GITHUB_ENV")
+          with open(env_file, "a") as fp:
+              fp.write(f"LATEST_DRAFT={latest_draft}")
+          EOF
+      - name: Delete old files from new version
+        if: ${{ github.event.inputs.keep != 'true' }}
+        run: |
+          python <<EOF
+          import requests, os, json, sys
+          params = {"access_token": os.getenv("TOKEN")}
+          LATEST_DRAFT = os.getenv("LATEST_DRAFT")
+          r = requests.get(LATEST_DRAFT, params=params, timeout=10)
+          assert r.status_code == 200, f"{r.status_code}, {r.json()}"
+          latest_draft = r.json()
+          sys.stdout.write(f"Latest draft: {json.dumps(latest_draft, indent=4)}\n")
+          for file in latest_draft["files"]:
+              r = requests.delete(LATEST_DRAFT + "/files/" + file["id"], params=params, timeout=10)
+              assert r.status_code == 204, f"{r.status_code}, {r.json()}"
+          EOF
+      - name: Upload files to new version
+        run: |
+          python <<EOF
+          import requests, os, json, sys
+          params = {"access_token": os.getenv("TOKEN")}
+          LATEST_DRAFT = os.getenv("LATEST_DRAFT")
+          r = requests.get(LATEST_DRAFT, params=params, timeout=10)
+          assert r.status_code == 200, f"{r.status_code}, {r.json()}"
+          latest_draft = r.json()
+          sys.stdout.write(f"Latest draft: {json.dumps(latest_draft, indent=4)}\n")
+          bucket_url = latest_draft["links"]["bucket"]
+          upload_dir = os.path.join(os.getcwd(), "release_files")
+          for filename in os.listdir(upload_dir):
+              with open(os.path.join(upload_dir, filename), "rb") as fp:
+                  sys.stdout.write(f"Uploading {filename}\n")
+                  r = requests.put(f"{bucket_url}/{filename}", data=fp, params=params, timeout=10)
+                  assert r.status_code == 200, f"{r.status_code}, {r.json()}"
+                  sys.stdout.write(f"Uploaded file: {json.dumps(r.json(), indent=4)}\n")
+          EOF
+      - name: Publish new version
+        if: ${{ github.event.inputs.publish == 'true' }}
+        run: |
+          python <<EOF
+          import requests, os, json, sys
+          params = {"access_token": os.getenv("TOKEN")}
+          LATEST_DRAFT = os.getenv("LATEST_DRAFT")
+          r = requests.post(f"{LATEST_DRAFT}/actions/publish", params=params)
+          assert r.status_code == 202, f"{r.status_code}, {r.json()}"
+          sys.stdout.write(f"Published deposition: {json.dumps(r.json(), indent=4)}\n")
+          EOF
