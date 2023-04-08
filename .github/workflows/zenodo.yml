@@ -78,7 +78,7 @@ jobs:
           for FILEPATH in release_files/*; do
               FILENAME=$(echo $FILEPATH | sed 's+.*/++g')
               echo "Uploading $FILENAME"
-              curl --progress-bar -o /dev/null --upload-file "$FILEPATH" $BUCKET/"$FILENAME"?access_token="$TOKEN"
+              curl -o /dev/null --upload-file "$FILEPATH" $BUCKET/"$FILENAME"?access_token="$TOKEN"
           done
       # - name: Upload files to new version
       #   run: |
