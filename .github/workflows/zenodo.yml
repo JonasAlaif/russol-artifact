@@ -46,7 +46,7 @@ jobs:
           SERVER = os.getenv("SERVER")
           DEPOSITION_ID = os.getenv("DEPOSITION_ID")
           sys.stdout.write(f"Using server {SERVER} and deposition {DEPOSITION_ID}\n")
-          r = requests.post(f"{SERVER}/api/deposit/depositions/{DEPOSITION_ID}/actions/newversion", params=params, timeout=1)
+          r = requests.post(f"{SERVER}/api/deposit/depositions/{DEPOSITION_ID}/actions/newversion", params=params, timeout=5)
           assert r.status_code == 201, f"{r.status_code}, {r.json()}"
           curr_deposition = r.json()
           sys.stdout.write(f"Current deposition: {json.dumps(curr_deposition, indent=4)}\n")
@@ -63,12 +63,12 @@ jobs:
           import requests, os, json, sys
           params = {"access_token": os.getenv("TOKEN")}
           LATEST_DRAFT = os.getenv("LATEST_DRAFT")
-          r = requests.get(LATEST_DRAFT, params=params, timeout=1)
+          r = requests.get(LATEST_DRAFT, params=params, timeout=5)
           assert r.status_code == 200, f"{r.status_code}, {r.json()}"
           latest_draft = r.json()
           sys.stdout.write(f"Latest draft: {json.dumps(latest_draft, indent=4)}\n")
           for file in latest_draft["files"]:
-              r = requests.delete(LATEST_DRAFT + "/files/" + file["id"], params=params, timeout=1)
+              r = requests.delete(LATEST_DRAFT + "/files/" + file["id"], params=params, timeout=5)
               assert r.status_code == 204, f"{r.status_code}, {r.json()}"
           EOF
       - name: Upload files to new version
