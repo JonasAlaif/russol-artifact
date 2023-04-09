@@ -45,11 +45,11 @@ jobs:
         run: |
           cd sources
           docker run --rm --network none jonasalaif/russol:${{ matrix.arch }} test --release --test ci -- all_tests --nocapture
-      # Skip due to very long runtime:
-      # - name: Run evaluation top 100 crates
-      #   run: |
-      #     cd sources
-      #     docker run --rm jonasalaif/russol:${{ matrix.arch }} test --release --test top_crates -- top_crates_cached --nocapture
+      - name: Run evaluation top 100 crates
+        if: ${{ matrix.arch == 'amd64' }}
+        run: |
+          cd sources
+          docker run --rm --network none jonasalaif/russol:${{ matrix.arch }} test --release --test top_crates -- top_crates_cached --nocapture
 
       - name: Save ${{ matrix.arch }} Russol image
         run: |

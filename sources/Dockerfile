@@ -30,6 +30,9 @@ RUN cargo run --release --bin ruslic ruslic/tests/synth/paper/rust/c-custom/gene
 COPY --chown=sbtuser demo /home/sbtuser/demo
 RUN cargo fetch --manifest-path=/home/sbtuser/demo/Cargo.toml
 
+# Prefetch crates for top_crates benchmark
+RUN cargo test --release --test top_crates -- prefetch_cached
+
 # Print outputs only relevant to evaluation
 ENV RUSLIC_EVAL=true
 
