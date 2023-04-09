@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: 'main'
-    paths: ['!.github/**', '.github/workflows/package-artifact.yml']
+    paths: ['**', '!.github/**', '.github/workflows/package-artifact.yml']
 
 permissions:
   contents: write
