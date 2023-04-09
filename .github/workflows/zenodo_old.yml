@@ -73,12 +73,23 @@ jobs:
           EOF
       - name: Upload files to new version
         run: |
-          BUCKET=$(curl "$LATEST_DRAFT"?access_token="$TOKEN" | jq --raw-output .links.bucket)
-          for FILEPATH in release_files/*; do
-              FILENAME=$(echo $FILEPATH | sed 's+.*/++g')
-              echo "Uploading $FILENAME"
-              curl -o /dev/null --upload-file "$FILEPATH" $BUCKET/"$FILENAME"?access_token="$TOKEN"
-          done
+          python <<EOF
+          import requests, os, json, sys
+          params = {"access_token": os.getenv("TOKEN")}
+          LATEST_DRAFT = os.getenv("LATEST_DRAFT")
+          r = requests.get(LATEST_DRAFT, params=params, timeout=1)
+          assert r.status_code == 200, f"{r.status_code}, {r.json()}"
+          latest_draft = r.json()
+          sys.stdout.write(f"Latest draft: {json.dumps(latest_draft, indent=4)}\n")
+          bucket_url = latest_draft["links"]["bucket"]
+          upload_dir = os.path.join(os.getcwd(), "release_files")
+          for filename in os.listdir(upload_dir):
+              with open(os.path.join(upload_dir, filename), "rb") as fp:
+                  sys.stdout.write(f"Uploading {filename}\n")
+                  r = requests.put(f"{bucket_url}/{filename}", data=fp, params=params, timeout=1)
+                  assert r.status_code == 200, f"{r.status_code}, {r.json()}"
+                  sys.stdout.write(f"Uploaded file: {json.dumps(r.json(), indent=4)}\n")
+          EOF
       - name: Publish new version
         if: ${{ github.event.inputs.publish == 'true' }}
         run: |

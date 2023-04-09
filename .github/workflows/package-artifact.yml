@@ -29,5 +29,6 @@ jobs:
           tag_name: latest
           files: |
             sources.zip
+            appendix.pdf
             LICENSE
             README.md
